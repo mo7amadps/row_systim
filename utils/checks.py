@@ -329,7 +329,7 @@ PREFIX_PERMISSION_RULES = {
     "صغرى": ("staff", ()),
     "عليا": ("highstaff", ()),
     "اونر": ("owner", ()),
-    "تايم": ("time", ("admin_role_id",)),
+    "تايم": ("time", ("admin_role_id", "giver_role_ids")),
     "فك-الباند": ("unban", ()),
     "ان": ("unmute", ()),
     "اعطي-اكسبي": ("__administrator__", ()),
