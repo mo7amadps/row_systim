@@ -350,6 +350,14 @@ async def prefix_command_permission_check(ctx: commands.Context) -> bool:
         return True
 
     section, extra_keys = rule
+
+    # "مسح" أمر واحد بس فيه صيغتين بصلاحيتين مختلفتين:
+    #   "مسح 20"          -> نظام المسح العادي (قسم clear)
+    #   "مسح @شخص 20"     -> نظام مسح شخص محدد (قسم clear_v2)
+    # لازم نميز هون بنفس منطق clear_cmd، وإلا رح يفحص صلاحية القسم
+    # الغلط ويحجب شخص عنده clear_v2 بس مش clear (أو العكس).
+    if ctx.command.name == "مسح" and ctx.message.mentions:
+        section = "clear_v2"
     if section == "__administrator__":
         if ctx.author.guild_permissions.administrator or is_owner(ctx.author):
             return True
