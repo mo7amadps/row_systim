@@ -108,10 +108,14 @@ class SecuritySystem(commands.Cog):
             return True
         if executor.id == guild.me.id:
             return True
-        allowed_role_ids = conf["security"][subsection].get("allowed_role_ids")
         member = guild.get_member(executor.id)
         if member is None:
             return False
+        # حماية الهيراركي: لو رتبة الشخص أعلى من (أو نفس مستوى) أعلى رتبة عند البوت،
+        # البوت أصلاً ما بيقدر تقنياً يشيل منه رتب/يعاقبه، فما لازم يحاول حتى.
+        if member.top_role.position >= guild.me.top_role.position:
+            return True
+        allowed_role_ids = conf["security"][subsection].get("allowed_role_ids")
         return has_any_role(member, allowed_role_ids)
 
     # ---------------- 1) حماية إضافة البوتات ----------------
