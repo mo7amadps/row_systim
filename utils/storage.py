@@ -233,8 +233,7 @@ def _default_guild() -> dict:
             "log_channel_id": None,
         },
         "auto_reply": {
-            "trigger_role_id": None,
-            "slots": {},  # {"1": {"trigger": "مرحبا", "reply": "اهلين"}, ...}
+            "slots": {},  # {"1": {"trigger": "مرحبا", "reply": "اهلين", "role_id": 123}, ...} - كل خانة برتبتها الخاصة
         },
         "rar": {
             "allowed_role_ids": [],
@@ -1103,13 +1102,29 @@ class Storage:
     # ---------- الردود التلقائية ----------
 
     @staticmethod
-    async def set_reply_slot(guild_id: int, slot_number: str, trigger: str, reply: str):
+    async def set_reply_slot(guild_id: int, slot_number: str, trigger: str, reply: str, role_id: int):
+        """كل خانة رد إلها رتبتها الخاصة (role_id) - مستقلة تماماً عن باقي الخانات."""
         async with _lock:
             data = _read()
             gid = str(guild_id)
             if gid not in data:
                 data[gid] = _default_guild()
-            data[gid].setdefault("auto_reply", {"trigger_role_id": None, "slots": {}})
+            data[gid].setdefault("auto_reply", {"slots": {}})
             data[gid]["auto_reply"].setdefault("slots", {})
-            data[gid]["auto_reply"]["slots"][str(slot_number)] = {"trigger": trigger, "reply": reply}
+            data[gid]["auto_reply"]["slots"][str(slot_number)] = {
+                "trigger": trigger,
+                "reply": reply,
+                "role_id": role_id,
+            }
+            _write(data)
+
+    @staticmethod
+    async def delete_reply_slot(guild_id: int, slot_number: str):
+        async with _lock:
+            data = _read()
+            gid = str(guild_id)
+            if gid not in data:
+                return
+            slots = data[gid].get("auto_reply", {}).get("slots", {})
+            slots.pop(str(slot_number), None)
             _write(data)
